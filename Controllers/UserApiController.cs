@@ -21,6 +21,7 @@ namespace UserAssignmentRedone.Controllers
             _context = context;
             _users = context.Users;
             _logger = logger;
+
         }
 
         // GET: api/UserApi
@@ -39,9 +40,10 @@ namespace UserAssignmentRedone.Controllers
 
         // GET: api/UserApi/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<IActionResult> GetUser(int id)
         {
             _logger.LogInformation("GetUser(int id) started executing");
+
             
           if (_context.Users == null)
           {
@@ -49,14 +51,14 @@ namespace UserAssignmentRedone.Controllers
               return NotFound();
           }
             var user = await _context.Users.FindAsync(id);
-
+            
             if (user == null)
             {
                 _logger.LogInformation("No User found with the passed id argument");
                 return NotFound();
             }
             _logger.LogInformation("Returning the user requested by GetUser(id)");
-            return user;
+            return Ok(user);
         }
 
         // PUT: api/UserApi/5
@@ -75,7 +77,7 @@ namespace UserAssignmentRedone.Controllers
             if (id != user.Id)
             {
                 _logger.LogInformation("Prevented Client from changing Id column");
-                return BadRequest();
+                return StatusCode(403);
             }
             
             if (UpdateIsValid(user))
@@ -97,7 +99,7 @@ namespace UserAssignmentRedone.Controllers
                 
             } else {
                 _logger.LogInformation("The input was not valid, returning ValidationProblem()");
-                return ValidationProblem();
+                return StatusCode(400);
             }
             
             try
@@ -107,16 +109,18 @@ namespace UserAssignmentRedone.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
+                
                 _logger.LogCritical("Database update failed, throwing DbUpdateConcurrencyException");
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
-            return NoContent();
+            
+            return Ok("Successfully updated the user.");
         }
 
         // POST: api/UserApi
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<IActionResult> PostUser(User user)
         {
             _logger.LogInformation("PostUser(User user) started executing");
             
@@ -140,7 +144,7 @@ namespace UserAssignmentRedone.Controllers
               
           } 
           _logger.LogInformation("user information invalid, returning ValidationProblem()"); 
-          return ValidationProblem();
+          return StatusCode(400);
           
           
         }
@@ -170,7 +174,7 @@ namespace UserAssignmentRedone.Controllers
             
             _logger.LogInformation("database update successful, returning NoContent()");
     
-            return NoContent();
+            return Ok("User successfully deleted.");
         }
 
         private bool UserExists(int id)

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc;
 
 namespace UserAssignmentRedone.Models
 {
@@ -37,8 +38,15 @@ namespace UserAssignmentRedone.Models
 		[RegularExpression(@"^09{1}\d{9}$", ErrorMessage = "Please enter a phone number using following format: 09XXXXXXXXX.")]
 		public string PhoneNumber { get; set; }
 
+        public static implicit operator User(ActionResult<User> v)
+        {
+            throw new NotImplementedException();
+        }
 
-		
-	}
+        public static implicit operator User(ActionResult<object> v)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
 
